@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 
+  Resume Challenge backend stack
+   #Cors is awful and i hate it but live by the sword and die by the sword
+Globals:
+  Api:
+    Cors:
+      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+  # Api:
+  #   Cors:
+  #     AllowHeaders: "'*'"
+  #     #AllowHeaders: "'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'" 
+  #     AllowOrigin: "'*'"
+  #   Auth:
+  #     DefaultAuthorizer: CognitoAuthorize
+  #     AddDefaultAuthorizerToCorsPreflight: False
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: dsresumefe
+      #  WebsiteConfiguration: 
+      #    ErrorDocument: String
+      #    IndexDocument: String
+      #    RedirectAllRequestsTo: RedirectAllRequestsTo
+      #    RoutingRules: - RoutingRule
+  VisitorCountFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/
+      Handler: dynamo_helper.lambda_handler
+      Runtime: python3.8
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        VisitorUpdate:
+          Type: Api
+          Properties:
+            Path: /visitor_count
+            Method: get
+            #MethodSettings: HttpMethod: '*'
+            # Cors:
+            #    AllowOrigin: '*'
+            #    AllowMethods: 'GET, POST, OPTIONS, PUT, DELETE'
+  
+  # VcTestTable:
+  #   Type: AWS::Serverless::SimpleTable
+  #   Properties:
+  #     PrimaryKey: 
+  #       Name: visitorcount
+  #       Type: Number
+  #       AttributeName: vc
+  #       AttributeType: Number
+  
+  VisitorCountTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions:
+      - AttributeName: 'VisitorCount'
+        AttributeType: 'N'
+      KeySchema:
+      - AttributeName: 'VisitorCount'
+        KeyType: 'HASH'
+      
+      # AttributeDefinitions: 
+      #   - 
+      #     AttributeName: "Visitors"
+      #     AttributeType: "N"
+      #   # - 
+      #   #   AttributeName: "vc"
+      #   #   AttributeType: "N"
+      BillingMode: PAY_PER_REQUEST
+      # KeySchema: 
+      #   - AttributeName: "Visitors"
+      #     KeyType: "HASH"
+        # - AttributeName: "vc"
+        #   KeyType: "RANGE"
+      #LocalSecondaryIndexes: 
+      #PointInTimeRecoverySpecification: 
+       # PointInTimeRecoverySpecification
+      #ProvisionedThroughput: 
+       # ProvisionedThroughput
+      #SSESpecification: 
+       # SSESpecification
+      #StreamSpecification: 
+       # StreamSpecification
+      TableName: Visitors
+      #Tags: 
+       # - Tag
+      #TimeToLiveSpecification: 
+       # TimeToLiveSpecification
+
+
+Outputs:
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
