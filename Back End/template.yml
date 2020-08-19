@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 
   Resume Challenge backend stack
-   #Cors is awful and i hate it but live by the sword and die by the sword
 Globals:
   Api:
     Cors:
